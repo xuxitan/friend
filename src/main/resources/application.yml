@@ -1,0 +1,9 @@
+
+spring:
+  data:
+    mongodb:
+      host: 192.168.1.141
+      port: 27017
+      database: ecp
+      username: ecp
+      password: hiynn123456
