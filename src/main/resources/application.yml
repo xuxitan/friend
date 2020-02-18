@@ -3,3 +3,8 @@ spring:
     active: dev
 server:
   port: 8888
+
+jpush:
+  appKey: 305b335053e2cc25d91a1d91
+  masterSecret: 2f656739b62fec43d37dad85
+  liveTime: 300000

@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.hiynn.friend.entity.Moment;
 import com.hiynn.friend.entity.Subscriber;
 import com.hiynn.friend.entity.TimeLine;
+import com.hiynn.friend.entity.UserBasic;
+import com.hiynn.friend.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -43,16 +45,15 @@ public class TimeLineListener {
         if (null != subscriber && null != subscriber.getSubscriberList()) {
             //数据集合
             List<TimeLine> list = new ArrayList<>();
-
-            for (String s : subscriber.getSubscriberList()) {
+            for (UserBasic userBasic : subscriber.getSubscriberList()) {
                 TimeLine timeLine = new TimeLine();
-                timeLine.setUserId(s);
+                timeLine.setUserId(userBasic.getId());
                 timeLine.setId(UUID.randomUUID().toString().replace("-", ""));
                 timeLine.setMomentId(moment.getId());
                 //好友
                 timeLine.setIsOwn(0);
                 timeLine.setIsShow(moment.getIsShow());
-                timeLine.setCreateTime(new Date());
+                timeLine.setCreateTime(DateUtil.nowTime());
                 list.add(timeLine);
             }
             //添加集合
