@@ -83,7 +83,7 @@ public class SubscriberServiceImpl implements SubscriberService {
             userBasic.setId(subscriber.getSubscriberId());
             userBasic.setImg(fan.getImg());
             userBasic.setTime(DateUtil.nowTime());
-
+            userBasic.setUserName(fan.getUserName());
             if (null != data.getSubscriberList()) {
                 data.getSubscriberList().add(userBasic);
             } else {
@@ -114,6 +114,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                 u.setId(user.getId());
                 u.setImg(user.getImg());
                 u.setTime(DateUtil.nowTime());
+                u.setUserName(user.getUserName());
                 if (null != fanData.getFanList()) {
                     fanData.getFanList().add(u);
                 } else {

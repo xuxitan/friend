@@ -13,6 +13,8 @@ public class Replay {
 
     private String fromImg;
 
+    private String fromUserName;
+
     private String to;
 
     private String content;

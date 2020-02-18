@@ -12,6 +12,8 @@ public class UserBasic {
 
     private String id;
 
+    private String userName;
+
     private String img;
 
     private String time;

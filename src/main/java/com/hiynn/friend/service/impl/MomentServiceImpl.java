@@ -75,6 +75,7 @@ public class MomentServiceImpl implements MomentService {
             replay.setContent(comment.getContent());
             replay.setFrom(comment.getFromId());
             replay.setFromImg(user.getImg());
+            replay.setFromUserName(user.getUserName());
             replay.setTo(comment.getToId());
             replay.setTime(DateUtil.nowTime());
             if (null == moment.getReplay()) {
@@ -127,6 +128,7 @@ public class MomentServiceImpl implements MomentService {
             userBasic.setId(userId);
             userBasic.setImg(user.getImg());
             userBasic.setTime(DateUtil.nowTime());
+            userBasic.setUserName(user.getUserName());
             if (null == moment.getPraiseList()) {
                 List<UserBasic> praiseList = new ArrayList<>();
                 praiseList.add(0, userBasic);
