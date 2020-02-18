@@ -10,11 +10,11 @@ import java.util.List;
  * @date 2020/2/14 15:18
  **/
 @Data
-public class Subscriber {
+public class Fan {
 
     private String id;
 
     private String userId;
 
-    private List<UserBasic> subscriberList;
+    private List<UserBasic> fanList;
 }

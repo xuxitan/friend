@@ -1,5 +1,6 @@
 package com.hiynn.friend.controller;
 
+import com.hiynn.friend.dto.CommentDTO;
 import com.hiynn.friend.dto.MomentDTO;
 import com.hiynn.friend.service.MomentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,19 @@ public class MomentController {
     @GetMapping("praise/{userId}/{momentId}")
     public String praise(@PathVariable String userId, @PathVariable String momentId) {
         momentService.praiseMoment(momentId, userId);
+        return "ok";
+    }
+
+    /***
+     * 描述 给朋友圈评论
+     * @author xuxitan
+     * @date 2020/2/17 10:47
+     * @param comment
+     * @return java.lang.String
+     */
+    @PostMapping("comment")
+    public String praise(@RequestBody CommentDTO comment){
+        momentService.commentMoment(comment);
         return "ok";
     }
 }

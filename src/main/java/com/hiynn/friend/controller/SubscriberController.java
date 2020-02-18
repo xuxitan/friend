@@ -34,6 +34,13 @@ public class SubscriberController {
         return "ok";
     }
 
+    /***
+     * 描述 删除好友
+     * @author xuxitan
+     * @date 2020/2/17 11:03
+     * @param subscriber
+     * @return java.lang.String
+     */
     @DeleteMapping("subscriber")
     public String remove(@RequestBody SubscriberDtO subscriber){
         subscriberService.removeSubscriber(subscriber);

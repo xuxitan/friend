@@ -2,7 +2,6 @@ package com.hiynn.friend.entity;
 
 import lombok.Data;
 
-import java.util.Date;
 
 /**
  * @author xuxitan
@@ -24,5 +23,5 @@ public class TimeLine {
 
     private int isOwn;
 
-    private Date createTime;
+    private String createTime;
 }

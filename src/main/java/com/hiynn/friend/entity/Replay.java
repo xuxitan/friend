@@ -10,6 +10,12 @@ import lombok.Data;
 @Data
 public class Replay {
     private String from;
+
+    private String fromImg;
+
     private String to;
+
     private String content;
+
+    private String time;
 }

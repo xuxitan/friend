@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.hiynn.friend.entity.Moment;
 import com.hiynn.friend.entity.Replay;
 import com.hiynn.friend.entity.TimeLine;
+import com.hiynn.friend.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import java.util.*;
 
 @SpringBootTest
+@Slf4j
 class MongoApplicationTests {
 
     @Autowired
@@ -25,11 +28,10 @@ class MongoApplicationTests {
 
     @Test
     public void addColumn(){
-        Query query = new Query(Criteria.where("id").is("TM1001"));
-        TimeLine one = mongoTemplate.findOne(query, TimeLine.class);
-        one.setUserId("131314");
-        mongoTemplate.save(one,"timeLine");
-        System.out.println(one);
+        Query query = new Query();
+        query.addCriteria(new Criteria().andOperator(Criteria.where("userName").is("xuxitan"), Criteria.where("password").is("123456")));
+        User one = mongoTemplate.findOne(query, User.class);
+        log.info("用户信息:"+JSON.toJSONString(one));
     }
 
     @Test

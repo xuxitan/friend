@@ -2,7 +2,6 @@ package com.hiynn.friend.entity;
 
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ public class Moment {
     private int isOwn;
     private int moments;
     private int praises;
-    private List<String> praiseList;
+    private List<UserBasic> praiseList;
     private List<Replay> replay;
-    private Date createTime;
+    private String createTime;
 }
