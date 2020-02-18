@@ -2,6 +2,7 @@ package com.hiynn.friend.controller;
 
 import com.hiynn.friend.dto.CommentDTO;
 import com.hiynn.friend.dto.MomentDTO;
+import com.hiynn.friend.dto.ShowDTO;
 import com.hiynn.friend.service.MomentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -56,5 +57,18 @@ public class MomentController {
     public String praise(@RequestBody CommentDTO comment){
         momentService.commentMoment(comment);
         return "ok";
+    }
+
+    /***
+     * 描述 设置朋友圈的公开、隐私
+     * @author xuxitan
+     * @date 2020/2/18 15:57
+     * @param show
+     * @return java.lang.String
+     */
+    @PostMapping("isShow")
+    public String isShow(@RequestBody ShowDTO show){
+        momentService.momentIsShow(show);
+        return "OK";
     }
 }

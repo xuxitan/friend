@@ -17,6 +17,8 @@ public class Replay {
 
     private String to;
 
+    private String toUserName;
+
     private String content;
 
     private String time;

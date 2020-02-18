@@ -13,7 +13,15 @@ public class TimeLine {
 
     private String id;
 
+    /**
+     * 关注好友的用户id
+     */
     private String userId;
+
+    /**
+     * 实际发送朋友圈的用户id
+     */
+    private String realityId;
 
     private String momentId;
 

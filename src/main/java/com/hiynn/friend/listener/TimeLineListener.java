@@ -47,7 +47,10 @@ public class TimeLineListener {
             List<TimeLine> list = new ArrayList<>();
             for (UserBasic userBasic : subscriber.getSubscriberList()) {
                 TimeLine timeLine = new TimeLine();
+                //关注的好友的
                 timeLine.setUserId(userBasic.getId());
+                //实际发朋友圈的用户
+                timeLine.setRealityId(subscriber.getUserId());
                 timeLine.setId(UUID.randomUUID().toString().replace("-", ""));
                 timeLine.setMomentId(moment.getId());
                 //好友

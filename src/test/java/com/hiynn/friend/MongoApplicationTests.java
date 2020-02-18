@@ -5,7 +5,9 @@ import com.hiynn.friend.entity.Moment;
 import com.hiynn.friend.entity.Replay;
 import com.hiynn.friend.entity.TimeLine;
 import com.hiynn.friend.entity.User;
+import com.hiynn.friend.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +29,14 @@ class MongoApplicationTests {
     private MongoTemplate mongoTemplate;
 
     @Test
+    public void  a(){
+        Query query = new Query(Criteria.where("userId").is("131314"));
+        Update update = new Update().set("isShow", 0);
+
+        mongoTemplate.updateMulti(query, update, "timeLine");
+    }
+
+    @Test
     public void addColumn(){
         Query query = new Query();
         query.addCriteria(new Criteria().andOperator(Criteria.where("userName").is("xuxitan"), Criteria.where("password").is("123456")));
@@ -46,7 +56,7 @@ class MongoApplicationTests {
         //好友
         timeLine.setIsOwn(0);
         timeLine.setIsShow(1);
-        timeLine.setCreateTime(new Date());
+        timeLine.setCreateTime(DateUtil.nowTime());
         list.add(timeLine);
         timeLine = new TimeLine();
         timeLine.setUserId("123");
@@ -55,7 +65,7 @@ class MongoApplicationTests {
         //好友
         timeLine.setIsOwn(0);
         timeLine.setIsShow(1);
-        timeLine.setCreateTime(new Date());
+        timeLine.setCreateTime(DateUtil.nowTime());
         list.add(timeLine);
         //添加集合
         mongoTemplate.insert(list, "timeLine");
@@ -72,7 +82,9 @@ class MongoApplicationTests {
 
         //指定删除元素
         Query query = new Query(Criteria.where("userId").is("U123"));
-        Update update = new Update().pull("subscriberList", "23");
+        Document document = new Document();
+        document.put("userId","U789");
+        Update update = new Update().pull("subscriberList",document);
         mongoTemplate.updateFirst(query, update, "subscriber");
     }
 
@@ -98,7 +110,7 @@ class MongoApplicationTests {
         timeline.setMomentId("M1001");
         timeline.setIsShow(1);
         timeline.setIsOwn(1);
-        timeline.setCreateTime(new Date());
+        timeline.setCreateTime(DateUtil.nowTime());
 
 
         Moment moment = new Moment();
@@ -117,8 +129,7 @@ class MongoApplicationTests {
         r1.setContent("我准备去钓鱼,你呢");
         replayList.add(r1);
         moment.setReplay(replayList);
-        moment.setPraiseList(list);
-        moment.setCreateTime(new Date());
+        moment.setCreateTime(DateUtil.nowTime());
         mongoTemplate.save(moment, "moment");
 //        mongoTemplate.save(timeline);
     }

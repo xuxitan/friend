@@ -4,16 +4,19 @@ import cn.jpush.api.report.UsersResult;
 import com.hiynn.friend.dto.CommentDTO;
 import com.hiynn.friend.dto.JPushReqParam;
 import com.hiynn.friend.dto.MomentDTO;
+import com.hiynn.friend.dto.ShowDTO;
 import com.hiynn.friend.entity.*;
 import com.hiynn.friend.service.JpushService;
 import com.hiynn.friend.service.MomentService;
 import com.hiynn.friend.util.DateUtil;
+import javafx.animation.Timeline;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +53,47 @@ public class MomentServiceImpl implements MomentService {
     private String imgPath;
 
     /***
+     * 描述 设置朋友圈的公开、隐私
+     * @author xuxitan
+     * @date 2020/2/18 15:58
+     * @param show
+     * @return void
+     */
+    @Override
+    public void momentIsShow(ShowDTO show) {
+
+        //删除该好友时间线上的数据
+        Query query = new Query();
+        query.addCriteria(new Criteria().andOperator(Criteria.where("userId").is(show.getUserId()),
+                Criteria.where("realityId").is(show.getUserId()),
+                Criteria.where("momentId").is(show.getMomentId())
+        ));
+        TimeLine timeline = mongoTemplate.findOne(query, TimeLine.class);
+        if (null == timeline) {
+            throw new RuntimeException("朋友圈不存在");
+        }
+        //如果设置隐私0,则删除关注好友的时间线数据
+        if (0 == show.getIsShow()) {
+            Query updateQuery = new Query();
+            updateQuery.addCriteria(new Criteria().andOperator(
+                    Criteria.where("realityId").is(show.getUserId()),
+                    Criteria.where("momentId").is(show.getMomentId())
+            ));
+            Update update = new Update().set("isShow", 0);
+
+            mongoTemplate.updateMulti(updateQuery, update, "timeLine");
+        } else if (1 == show.getIsShow()) {
+            //设置公开,异步将该朋友圈推送到作者的所有好友时间线上
+            Moment moment = new Moment();
+            moment.setId(timeline.getMomentId());
+            moment.setIsShow(1);
+            jmsMessagingTemplate.convertAndSend("queue_time_line", moment);
+        } else {
+            throw new RuntimeException("参数有误");
+        }
+    }
+
+    /***
      * 描述 给朋友圈评论回复
      * @author xuxitan
      * @date 2020/2/17 10:48
@@ -68,6 +112,12 @@ public class MomentServiceImpl implements MomentService {
             if (null == user) {
                 throw new RuntimeException("用户不存在");
             }
+            //被评论、回复的用户信息
+            Query beq = new Query(Criteria.where("id").is(comment.getToId()));
+            User toUser = mongoTemplate.findOne(beq, User.class);
+            if (null == toUser) {
+                throw new RuntimeException("用户不存在");
+            }
             //评论数加1
             moment.setMoments(moment.getMoments() + 1);
             //添加评论信息
@@ -76,14 +126,17 @@ public class MomentServiceImpl implements MomentService {
             replay.setFrom(comment.getFromId());
             replay.setFromImg(user.getImg());
             replay.setFromUserName(user.getUserName());
-            replay.setTo(comment.getToId());
+            if (!moment.getUserId().equals(comment.getFromId())) {
+                replay.setTo(comment.getToId());
+                replay.setToUserName(toUser.getUserName());
+            }
             replay.setTime(DateUtil.nowTime());
             if (null == moment.getReplay()) {
                 List<Replay> list = new ArrayList<>();
                 list.add(replay);
                 moment.setReplay(list);
             } else {
-                moment.getReplay().add(0,replay);
+                moment.getReplay().add(0, replay);
             }
             //有则改之,无则加之
             mongoTemplate.save(moment, "moment");
@@ -217,6 +270,7 @@ public class MomentServiceImpl implements MomentService {
         //先把自己添加到时间线中
         TimeLine timeLine = new TimeLine();
         timeLine.setUserId(moment.getUserId());
+        timeLine.setRealityId(moment.getUserId());
         timeLine.setId(UUID.randomUUID().toString().replace("-", ""));
         timeLine.setMomentId(moment.getId());
         timeLine.setIsOwn(moment.getIsOwn());
@@ -233,7 +287,11 @@ public class MomentServiceImpl implements MomentService {
             log.info("更新自己发布的朋友圈数量为:{}", user.getMoments());
         }
 
-        //异步将该朋友圈推送到作者的所有好友时间线上
-        jmsMessagingTemplate.convertAndSend("queue_time_line", moment);
+        //如果设置公开
+        if (1 == moment.getIsShow()) {
+            //异步将该朋友圈推送到作者的所有好友时间线上
+            jmsMessagingTemplate.convertAndSend("queue_time_line", moment);
+        }
+
     }
 }

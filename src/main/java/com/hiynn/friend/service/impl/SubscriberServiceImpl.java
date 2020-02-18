@@ -11,6 +11,7 @@ import com.hiynn.friend.service.SubscriberService;
 import com.hiynn.friend.util.DateUtil;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -47,8 +48,45 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Override
     public void removeSubscriber(SubscriberDtO subscriber) {
         Query query = new Query(Criteria.where("userId").is(subscriber.getUserId()));
-        Update update = new Update().pull("subscriberList", subscriber.getSubscriberId());
-        mongoTemplate.updateFirst(query, update, "subscriber");
+        User user = mongoTemplate.findOne(query, User.class);
+        if (null == user) {
+            throw new RuntimeException("用户不存在");
+        }
+        //关注数量减一
+        user.setSubscribers(user.getSubscribers() > 1 ? user.getSubscribers() - 1 : 0);
+
+        Query subQuery = new Query(Criteria.where("userId").is(subscriber.getSubscriberId()));
+        User subUser= mongoTemplate.findOne(subQuery, User.class);
+        if (null == subUser) {
+            throw new RuntimeException("用户不存在");
+        }
+        //粉丝数量减一
+        subUser.setFans(subUser.getFans() > 1 ? subUser.getFans() - 1 : 0);
+
+        //关注列表删除
+        Subscriber subList = mongoTemplate.findOne(query, Subscriber.class);
+        if(null == subList){
+            throw new RuntimeException("关注列表不存在");
+        }
+
+        //指定删除元素
+        Query sQuery = new Query(Criteria.where("userId").is(subList.getUserId()));
+        Document document = new Document();
+        document.put("userId",subList.getSubscriberList());
+        Update update = new Update().pull("subscriberList",document);
+        mongoTemplate.updateFirst(sQuery, update, "subscriber");
+
+        //粉丝列表删除
+        Query fanQuery = new Query(Criteria.where("userId").is(subList.getSubscriberList()));
+        Document fanDocument = new Document();
+        document.put("userId",subList.getSubscriberList());
+        Update fanUpdate = new Update().pull("fanList",fanDocument);
+        mongoTemplate.updateFirst(fanQuery, fanUpdate, "fan");
+
+        //删除该好友时间线上的数据
+        Query removeQuery = new Query();
+        removeQuery.addCriteria(new Criteria().andOperator(Criteria.where("userId").is(subscriber.getUserId()), Criteria.where("realityId").is(subscriber.getSubscriberId())));
+        mongoTemplate.remove(removeQuery,"subscriber");
     }
 
     /***

@@ -2,6 +2,7 @@ package com.hiynn.friend.service;
 
 import com.hiynn.friend.dto.CommentDTO;
 import com.hiynn.friend.dto.MomentDTO;
+import com.hiynn.friend.dto.ShowDTO;
 
 public interface MomentService {
 
@@ -32,4 +33,13 @@ public interface MomentService {
      * @return void
      */
     void commentMoment(CommentDTO comment);
+
+    /***
+     * 描述 设置朋友圈的公开、隐私
+     * @author xuxitan
+     * @date 2020/2/18 15:58
+     * @param show
+     * @return void
+     */
+    void momentIsShow(ShowDTO show);
 }

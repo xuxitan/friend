@@ -1,5 +1,6 @@
 package com.hiynn.friend.controller;
 
+import com.hiynn.friend.dto.ShowDTO;
 import com.hiynn.friend.dto.SubscriberDtO;
 import com.hiynn.friend.service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class SubscriberController {
     private SubscriberService subscriberService;
 
     /***
-     * 描述 添加好友
+     * 描述 关注好友
      * @author xuxitan
      * @date 2020/2/14 16:05
      * @param subscriber
@@ -35,7 +36,7 @@ public class SubscriberController {
     }
 
     /***
-     * 描述 删除好友
+     * 描述 取消关注
      * @author xuxitan
      * @date 2020/2/17 11:03
      * @param subscriber
