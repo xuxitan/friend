@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @description
  * @date 2020/2/14 14:38
  **/
-@Api(tags = "朋友圈评论、点赞")
+@Api(tags = "朋友圈评论、点赞控制器")
 @RestController
 public class MomentController {
 

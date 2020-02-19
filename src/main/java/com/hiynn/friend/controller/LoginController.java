@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @description
  * @date 2020/2/17 16:23
  **/
-@Api(tags = "系统登录")
+@Api(tags = "系统登录控制器")
 @RestController
 public class LoginController {
 
