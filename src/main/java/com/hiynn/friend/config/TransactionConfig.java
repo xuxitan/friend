@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @description
  * @date 2020/2/14 16:17
  **/
-@Component
+//@Component
 public class TransactionConfig {
 
     @Bean

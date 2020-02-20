@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
  * @description
  * @date 2020/2/14 15:08
  **/
+@EnableJms
 @Component
 @Slf4j
 public class TimeLineListener {
@@ -48,7 +50,7 @@ public class TimeLineListener {
             for (UserBasic userBasic : subscriber.getSubscriberList()) {
                 TimeLine timeLine = new TimeLine();
                 //关注的好友的
-                timeLine.setUserId(userBasic.getId());
+                timeLine.setUserId(userBasic.getUserId());
                 //实际发朋友圈的用户
                 timeLine.setRealityId(subscriber.getUserId());
                 timeLine.setId(UUID.randomUUID().toString().replace("-", ""));

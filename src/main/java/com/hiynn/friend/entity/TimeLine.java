@@ -2,6 +2,8 @@ package com.hiynn.friend.entity;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 
 /**
  * @author xuxitan
@@ -9,7 +11,9 @@ import lombok.Data;
  * @date 2020/2/13 16:02
  **/
 @Data
-public class TimeLine {
+public class TimeLine implements Serializable {
+
+    private static final long serialVersionUID = -2991118299136480355L;
 
     private String id;
 

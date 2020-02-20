@@ -30,10 +30,19 @@ class MongoApplicationTests {
 
     @Test
     public void  a(){
-        Query query = new Query(Criteria.where("userId").is("131314"));
-        Update update = new Update().set("isShow", 0);
-
-        mongoTemplate.updateMulti(query, update, "timeLine");
+        User user = new User();
+        user.setId("U789");
+        user.setUserName("xiaoming");
+        user.setPassword("123456");
+        user.setImg("c.jpg");
+        user.setSex("1");
+        user.setAge(40);
+        user.setCreateTime(DateUtil.nowTime());
+        user.setEmail("123@163.com");
+        user.setActive(0);
+        user.setSign("小米手机总经理");
+        user.setPhone("12345678901");
+        mongoTemplate.save(user);
     }
 
     @Test
@@ -83,7 +92,7 @@ class MongoApplicationTests {
         //指定删除元素
         Query query = new Query(Criteria.where("userId").is("U123"));
         Document document = new Document();
-        document.put("userId","U789");
+        document.put("_id","U789");
         Update update = new Update().pull("subscriberList",document);
         mongoTemplate.updateFirst(query, update, "subscriber");
     }

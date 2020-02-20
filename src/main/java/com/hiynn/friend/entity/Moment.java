@@ -2,6 +2,7 @@ package com.hiynn.friend.entity;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,10 @@ import java.util.List;
  * @date 2020/2/13 16:19
  **/
 @Data
-public class Moment {
+public class Moment implements Serializable {
+
+    private static final long serialVersionUID = 9024019218334585814L;
+
     private String id;
     private String userId;
     private String content;

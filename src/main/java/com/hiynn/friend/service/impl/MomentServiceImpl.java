@@ -1,6 +1,7 @@
 package com.hiynn.friend.service.impl;
 
 import cn.jpush.api.report.UsersResult;
+import com.alibaba.fastjson.JSON;
 import com.hiynn.friend.dto.CommentDTO;
 import com.hiynn.friend.dto.JPushReqParam;
 import com.hiynn.friend.dto.MomentDTO;
@@ -11,6 +12,7 @@ import com.hiynn.friend.service.MomentService;
 import com.hiynn.friend.util.DateUtil;
 import javafx.animation.Timeline;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.jms.Destination;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,7 +64,13 @@ public class MomentServiceImpl implements MomentService {
      */
     @Override
     public void momentIsShow(ShowDTO show) {
-
+        //校验用户和朋友圈是否匹配
+        Query validateQuery = new Query();
+        validateQuery.addCriteria(new Criteria().andOperator(Criteria.where("userId").is(show.getUserId()), Criteria.where("id").is(show.getMomentId())));
+        Moment validate = mongoTemplate.findOne(validateQuery, Moment.class);
+        if (null == validate) {
+            throw new RuntimeException("操作有误");
+        }
         //删除该好友时间线上的数据
         Query query = new Query();
         query.addCriteria(new Criteria().andOperator(Criteria.where("userId").is(show.getUserId()),
@@ -72,25 +81,22 @@ public class MomentServiceImpl implements MomentService {
         if (null == timeline) {
             throw new RuntimeException("朋友圈不存在");
         }
+        Query updateQuery = new Query();
+        updateQuery.addCriteria(new Criteria().andOperator(
+                Criteria.where("realityId").is(show.getUserId()),
+                Criteria.where("momentId").is(show.getMomentId())
+        ));
+        Update update = new Update();
         //如果设置隐私0,则删除关注好友的时间线数据
         if (0 == show.getIsShow()) {
-            Query updateQuery = new Query();
-            updateQuery.addCriteria(new Criteria().andOperator(
-                    Criteria.where("realityId").is(show.getUserId()),
-                    Criteria.where("momentId").is(show.getMomentId())
-            ));
-            Update update = new Update().set("isShow", 0);
-
-            mongoTemplate.updateMulti(updateQuery, update, "timeLine");
+            update.set("isShow", 0);
         } else if (1 == show.getIsShow()) {
             //设置公开,异步将该朋友圈推送到作者的所有好友时间线上
-            Moment moment = new Moment();
-            moment.setId(timeline.getMomentId());
-            moment.setIsShow(1);
-            jmsMessagingTemplate.convertAndSend("queue_time_line", moment);
+            update.set("isShow", 1);
         } else {
             throw new RuntimeException("参数有误");
         }
+        mongoTemplate.updateMulti(updateQuery, update, "timeLine");
     }
 
     /***
@@ -102,6 +108,7 @@ public class MomentServiceImpl implements MomentService {
      */
     @Override
     public void commentMoment(CommentDTO comment) {
+        log.info("【评论】:{}", JSON.toJSONString(comment));
         //先查询该朋友圈信息
         Query query = new Query(Criteria.where("id").is(comment.getMomentId()));
         Moment moment = mongoTemplate.findOne(query, Moment.class, "moment");
@@ -166,6 +173,7 @@ public class MomentServiceImpl implements MomentService {
      */
     @Override
     public void praiseMoment(String momentId, String userId) {
+        log.info("用户:{}给朋友圈:{}点赞", userId, momentId);
         Query query = new Query(Criteria.where("id").is(momentId));
         Moment moment = mongoTemplate.findOne(query, Moment.class, "moment");
         if (null != moment) {
@@ -178,9 +186,9 @@ public class MomentServiceImpl implements MomentService {
             //点赞数加1
             moment.setPraises(moment.getPraises() + 1);
             UserBasic userBasic = new UserBasic();
-            userBasic.setId(userId);
+            userBasic.setUserId(userId);
             userBasic.setImg(user.getImg());
-            userBasic.setTime(DateUtil.nowTime());
+            userBasic.setCreateTime(DateUtil.nowTime());
             userBasic.setUserName(user.getUserName());
             if (null == moment.getPraiseList()) {
                 List<UserBasic> praiseList = new ArrayList<>();
@@ -193,6 +201,7 @@ public class MomentServiceImpl implements MomentService {
             //有则改之,无则加之
             mongoTemplate.save(moment, "moment");
 
+            log.info("点赞成功");
             //给发朋友圈的人发点赞通知
             JPushReqParam reqParam = new JPushReqParam();
             reqParam.setTitle("点赞通知");
@@ -289,8 +298,9 @@ public class MomentServiceImpl implements MomentService {
 
         //如果设置公开
         if (1 == moment.getIsShow()) {
+            Destination queueName = new ActiveMQQueue("queue_time_line");
             //异步将该朋友圈推送到作者的所有好友时间线上
-            jmsMessagingTemplate.convertAndSend("queue_time_line", moment);
+            jmsMessagingTemplate.convertAndSend(queueName, JSON.toJSONString(moment));
         }
 
     }
